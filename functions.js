@@ -3,6 +3,7 @@
  */
 // reset all page items before assign / update new value
 // new cop app module for additional directives
+"use strict";
 angular.module("guestDetails.directive", []).directive("ngDateMask", function() {
     return function(scope, element) {
         element.mask("99-99-9999" + (!element.hasClass('no-time-required') ? " (99:99)" : ""), {
