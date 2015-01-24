@@ -3,39 +3,13 @@
  */
 "use strict";
 angular.module("guestDetails").controller("cntrGuestDetails", ["$scope", "$rootScope", "GuestDetails", "GDUtility", "$timeout", function cntrGuestDetails(GDscope, ROOTScope, GDDetails, GDUtility, $timeout) {
-    var activeTabs = [];
-    GDscope.imagesLocation = GDUtility.imagesLocation;
-    GDscope.viewsLocation = GDUtility.viewsLocation;
-    GDscope.ifExtendGuestSelected = '';
-
-    GDscope.openSelectedRow = function(options, index, event) {
-        if (GDUtility.queryString.singleVoyno === options.voyno 
-			&& GDUtility.queryString.singleBookno === options.bookno 
-			&& GDUtility.queryString.singleSeqno === options.seqno) {
-            // action...
-        }
-    };
-
     GDDetails.getGuestList(GDscope);
-
-    // get views base path + views.html
-    GDscope.getViewSource = function(viewFileName) {
-        return GDscope.viewsLocation + viewFileName;
-    };
-
-    // get image base path + image_name.format
-    GDscope.getImageSource = function(imageSrc) {
-        return GDscope.imagesLocation + imageSrc;
-    };
-
-    // (extend guestMoreInformation) ifExtendGuest function to expand and collapse
-    GDscope.ifExtendGuest = function(ind) {
-        return activeTabs.indexOf(ind) > -1 && GDscope.ifExtendGuestSelected == ind;
-    };
 
     // (extend guestMoreInformation) extendGuestDetails function to expand and collapse
     GDscope.extendGuestDetails = function(ind) {
-        GDscope.ifExtendGuest(ind) && (GDscope.ifExtendGuestSelected = '', activeTabs.splice(activeTabs.indexOf(ind), 1)) || (activeTabs.push(ind), GDscope.ifExtendGuestSelected = ind);
+        GDscope.ifExtendGuest(ind) 
+			&& (GDscope.ifExtendGuestSelected = '', activeTabs.splice(activeTabs.indexOf(ind), 1)) 
+			|| (activeTabs.push(ind), GDscope.ifExtendGuestSelected = ind);
     };
 
     // guestMoreInformation function to expand and collapse
@@ -115,8 +89,9 @@ angular.module("guestDetails").controller("cntrGuestDetails", ["$scope", "$rootS
         // modifySelected ==> update selected data into root model
         RDscope.modifySelected = function(section, property, element, index) {
             var getProperty = GDUtility.getSelectIndex('object');
-            getProperty.status && property && (RDscope.guestList[getProperty.value]
-                [GDUtility.getValue(section, global)][index][property] = element || '');
+            getProperty.status && property 
+				&& (RDscope.guestList[getProperty.value][GDUtility.getValue(section, global)][index][property] = element || '');
+				
             getProperty.status && !property && (RDscope.guestList[getProperty.value][section] = element || '');
         };
 
@@ -124,8 +99,10 @@ angular.module("guestDetails").controller("cntrGuestDetails", ["$scope", "$rootS
         RDscope.addSection = function addGuest(section, event, object, column) {
             var selected = GDUtility.getSelectedIndex(event.target),
                 selValue = GDUtility.getValue(section, global);
+				
             GDUtility.getSelectedData.apply(null, [RDscope, "guestList", selected])[selValue]
                 .push(angular.copy(GDUtility.getValue(selValue, global)));
+				
             GDDetails.guestAdd(GDUtility.getValue(section, global), selected, column, {
                 scope: RDscope,
                 data: GDUtility.getSelectedData(RDscope, "guestList", selected),
@@ -231,9 +208,7 @@ angular.module("guestDetails").controller("cntrGuestDetails", ["$scope", "$rootS
                         section: section,
                         data: guestList,
                         success: function(response) {
-                            //window.location.reload();
                             GDDetails.getGuestList(GDUtility.getRootScope());
-                            // !RDscope.$$phase && RDscope.$apply();
                         }
                     });
 
