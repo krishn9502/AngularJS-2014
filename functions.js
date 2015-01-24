@@ -4,22 +4,11 @@
 // reset all page items before assign / update new value
 // new cop app module for additional directives
 "use strict";
-angular.module("guestDetails.directive", []).directive("ngDateMask", function() {
-    return function(scope, element) {
-        element.mask("99-99-9999" + (!element.hasClass('no-time-required') ? " (99:99)" : ""), {
-            placeholder: "_"
-        });
-    }
-}).directive("autoComplete", function($timeout) {
-    return function(scope, iElement, iAttrs) {};
-});
 // new cop app module (guestDetails) for base application
 angular.module("guestDetails", [
     "ngSanitize",
-    "ui.bootstrap",
     "ngAnimate",
-    "ngRoute",
-    "guestDetails.directive"
+    "ngRoute"
 ])
 
 // global constant variables in key: value pair
@@ -152,8 +141,8 @@ angular.module("guestDetails", [
         _GDUitilityPvt = {
             // get voyage date for application level
             _voyageDate: function() {
-                var voyno = _GDUtility.queryString.singleVoyno;
-                return new Date(+voyno.substring(2, 6), +voyno.substring(6, 8) - 1, +voyno.substring(8, 10));
+                var currentVoyno = _GDUtility.queryString.singleVoyno;
+                return new Date(+currentVoyno.substring(2, 6), +currentVoyno.substring(6, 8) - 1, +currentVoyno.substring(8, 10));
             },
 
             // convert string to date format (only works if string is in valid date format ==> "Thu Jan 15 2015 07:41:33")
@@ -162,9 +151,9 @@ angular.module("guestDetails", [
             },
 
             // if user input is valid date string
-            _validateDate: function(date) {
-                var format = date ? date.replace(/\(|\)/g, '').split(' ') : ['03-03-1900'];
-                return _GDUitilityPvt._getDateFormat(format[0].split('-'), format[1] ? format[1].split(':') : null);
+            _validateDate: function(dateInString) {
+                var dateFormat = dateInString ? dateInString.replace(/\(|\)/g, '').split(' ') : ['03-03-1900'];
+                return _GDUitilityPvt._getDateFormat(dateFormat[0].split('-'), dateFormat[1] ? dateFormat[1].split(':') : null);
             },
 
             // validate selected section for selected user (one at a time)
@@ -198,108 +187,14 @@ angular.module("guestDetails", [
                                                 property: property,
                                                 message: "DEPARTURE DATE of section - " + (selectedcol + 1) + " should be greater than voyage start date: " + voyageDate
                                             });
-
-                                            // if ARRIVAL DATE is less than voyage date, an error message should be display
-                                        } else if (_GDUitilityPvt._validateDate(selectedObject['arrivalDateTime']) < voyageDate) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "ARRIVAL DATE of section - " + (selectedcol + 1) + " should be greater than voyage start date: " + voyageDate
-                                            });
-
-                                            // if DEPARTURE DATE is after ARRIVAL DATE
-                                        } else if (_GDUitilityPvt._validateDate(objValue) > _GDUitilityPvt._validateDate(selectedObject['arrivalDateTime'])) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "DEPARTURE DATE of section - " + (selectedcol + 1) + " should be before than ARRIVAL date: "
-                                            });
-                                        } else {
-                                            result.endIndex++;
-                                        }
+										}
                                     }).call();
                                     break;
 
                                     // if ARRIVAL field
-                                case "ARRIVAL":
-                                    (function ARRIVALDATE() {
-                                        // if ARRIVAL DATE is less than voyage date, an error message should be display
-                                        if (_GDUitilityPvt._validateDate(objValue) < voyageDate) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "ARRIVAL DATE of section - " + (selectedcol + 1) + " should be greater than voyage start date: " + voyageDate
-                                            });
-
-                                            // if DEPARTURE DATE is less than voyage date, an error message should be display
-                                        } else if (_GDUitilityPvt._validateDate(selectedObject['departureDateTime']) < voyageDate) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "DEPARTURE DATE of section - " + (selectedcol + 1) + " should be greater than voyage start date: " + voyageDate
-                                            });
-
-                                            // if DEPARTURE DATE is after ARRIVAL DATE
-                                        } else if (_GDUitilityPvt._validateDate(objValue) < _GDUitilityPvt._validateDate(selectedObject['departureDateTime'])) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "ARRIVAL DATE of section - " + (selectedcol + 1) + " should be after DEPARTURE date"
-                                            });
-                                        } else {
-                                            result.endIndex++;
-                                        }
-                                    }).call();
-                                    break;
-
-                                    // if CHECKIN field
-                                case "CHECKIN":
-                                    (function CHECKIN() {
-                                        // if CHECKIN DATE is less than voyage date, an error message should be display
-                                        if (_GDUitilityPvt._validateDate(objValue) < voyageDate) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "CHECKIN DATE of section - " + (selectedcol + 1) + " should be greater than voyage start date: " + voyageDate
-                                            });
-
-                                            // if CHECKOUT DATE is less than voyage date, an error message should be display
-                                        } else if (_GDUitilityPvt._validateDate(selectedObject['checkOutDate']) < voyageDate) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "CHECKOUT DATE of section - " + (selectedcol + 1) + " should be greater than voyage start date: " + voyageDate
-                                            });
-
-                                            // if CHECKIN DATE is after CHECKOUT DATE
-                                        } else if (_GDUitilityPvt._validateDate(objValue) > _GDUitilityPvt._validateDate(selectedObject['checkOutDate'])) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "CHECKIN DATE of section - " + (selectedcol + 1) + " should be before checkout date"
-                                            });
-                                        } else {
-                                            result.endIndex++;
-                                        }
-                                    }).call();
-                                    break;
-
-                                    // if CHECKOUT field
-                                case "CHECKOUT":
-                                    (function CHECKIN() {
-                                        if (_GDUitilityPvt._validateDate(objValue) < voyageDate) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "CHECKOUT DATE of section - " + (selectedcol + 1) + " should be greater than voyage start date: " + voyageDate
-                                            });
-                                        } else if (_GDUitilityPvt._validateDate(selectedObject['checkInDate']) < voyageDate) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "CHECKIN DATE of section - " + (selectedcol + 1) + " should be greater than voyage start date: " + voyageDate
-                                            });
-                                        } else if (_GDUitilityPvt._validateDate(objValue) > _GDUitilityPvt._validateDate(selectedObject['checkOutDate'])) {
-                                            result.fields.push({
-                                                property: property,
-                                                message: "CHECKIN DATE of section - " + (selectedcol + 1) + " should be before checkout date"
-                                            });
-                                        } else {
-                                            // validated successfully
-                                            result.endIndex++;
-                                        }
-                                    }).call();
-                                    break;
+                                case "ARRIVAL": break;
+                                case "CHECKIN": break;
+                                case "CHECKOUT": break;
                             }
                         } else {
                             // validated successfully
@@ -326,8 +221,7 @@ angular.module("guestDetails", [
             // get common page items with updated values
             _getCommonItems: function(selected, fields) {
                 // default page items for each request
-                var _default = ["voyno", "bookno", "seqno"],
-                    _listedField = [];
+                var _default = ["voyno", "bookno", "seqno"], _listedField = [];
 
                 // angular.forEach(["voyno", "bookno", "seqno"] + fields, if available)
                 angular.forEach(fields ? _default.concat(fields) : _default, function(field, index) {
@@ -355,8 +249,7 @@ angular.module("guestDetails", [
             // get all global page items with updated values
             _getPageItems: function getitems(selected, parentObj, columnSegment, isEmpty) {
                 // default page items for each request
-                var storage = [],
-                    defaultFields = ["voyno", "bookno", "seqno"];
+                var storage = [], defaultFields = ["voyno", "bookno", "seqno"];
 
                 columnSegment = columnSegment || 0;
                 columnSegment && defaultFields.push.apply(defaultFields, [
@@ -615,7 +508,7 @@ angular.module("guestDetails", [
                             status: 'N',
                             msg: 'Error :- ' + data
                         });
-                    }, !0);
+                    }, true);
             },
 
             // delete all guest form selected row
@@ -627,7 +520,7 @@ angular.module("guestDetails", [
                             status: 'N',
                             msg: 'Error :- ' + response
                         });
-                    }, !0);
+                    }, true);
             },
 
             // save and modify selected section
@@ -641,7 +534,7 @@ angular.module("guestDetails", [
                                 msg: 'Error :- ' + data
                             });
                         }, !0);
-                }, !0));
+                }, true));
             },
 
             // validate all fields before any action
@@ -879,339 +772,4 @@ angular.module("guestDetails", [
             }
         };
     }
-]).animation(".slideToggle", function() {
-    var hideClass = "ng-hide";
-    return {
-        beforeAddClass: function(element, className, done) {
-            className === hideClass && element.slideUp(done);
-        },
-
-        removeClass: function(element, className, done) {
-            className === hideClass && element.hide().slideDown(done);
-        }
-    };
-});
-
-(function($) {
-    function getPasteEvent() {
-        var el = document.createElement("input"),
-            name = "onpaste";
-
-        el.setAttribute(name, "");
-        return typeof el[name] === "function" ? "paste" : "input";
-    }
-
-    var pasteEventName = getPasteEvent() + ".mask",
-        ua = navigator.userAgent,
-        iPhone = /iphone/i.test(ua),
-        android = /android/i.test(ua),
-        caretTimeoutId;
-
-    $.mask = {
-        definitions: {
-            9: "[0-9]",
-            "a": "[A-Za-z]",
-            "*": "[A-Za-z0-9]"
-        },
-        dataName: "rawMaskFn",
-        placeholder: "_"
-    };
-
-    $.fn.extend({
-        caret: function(begin, end) {
-            var range;
-            if (this.length === 0 || this.is(":hidden")) {
-                return;
-            }
-            if (typeof begin == "number") {
-                end = typeof end === "number" ? end : begin;
-                return this.each(function() {
-                    if (this.setSelectionRange) {
-                        this.setSelectionRange(begin, end);
-                    } else {
-                        if (this.createTextRange) {
-                            range = this.createTextRange();
-                            range.collapse(true);
-                            range.moveEnd("character", end);
-                            range.moveStart("character", begin);
-                            range.select();
-                        }
-                    }
-                });
-            } else {
-                if (this[0].setSelectionRange) {
-                    begin = this[0].selectionStart;
-                    end = this[0].selectionEnd;
-                } else {
-                    if (document.selection && document.selection.createRange) {
-                        range = document.selection.createRange();
-                        begin = 0 - range.duplicate().moveStart("character", -1E5);
-                        end = begin + range.text.length;
-                    }
-                }
-                return {
-                    begin: begin,
-                    end: end
-                };
-            }
-        },
-        unmask: function() {
-            return this.trigger("unmask");
-        },
-        mask: function(mask, settings) {
-            var input, defs, tests, partialPosition, firstNonMaskPos, len;
-            if (!mask && this.length > 0) {
-                input = $(this[0]);
-                return input.data($.mask.dataName)();
-            }
-            settings = $.extend({
-                placeholder: $.mask.placeholder,
-                completed: null
-            }, settings);
-            defs = $.mask.definitions;
-            tests = [];
-            partialPosition = len = mask.length;
-            firstNonMaskPos = null;
-            $.each(mask.split(""), function(i, c) {
-                if (c == "?") {
-                    len--;
-                    partialPosition = i;
-                } else {
-                    if (defs[c]) {
-                        tests.push(new RegExp(defs[c]));
-                        if (firstNonMaskPos === null) {
-                            firstNonMaskPos = tests.length - 1;
-                        }
-                    } else {
-                        tests.push(null);
-                    }
-                }
-            });
-            return this.trigger("unmask").each(function() {
-                var input = $(this),
-                    buffer = $.map(mask.split(""), function(c, i) {
-                        if (c != "?") {
-                            return defs[c] ? settings.placeholder : c;
-                        }
-                    }),
-                    focusText = input.val();
-
-                function seekNext(pos) {
-                    while (++pos < len && !tests[pos]) {}
-                    return pos;
-                }
-
-                function seekPrev(pos) {
-                    while (--pos >= 0 && !tests[pos]) {}
-                    return pos;
-                }
-
-                function shiftL(begin, end) {
-                    var i, j;
-                    if (begin < 0) {
-                        return;
-                    }
-                    for (i = begin, j = seekNext(end); i < len; i++) {
-                        if (tests[i]) {
-                            if (j < len && tests[i].test(buffer[j])) {
-                                buffer[i] = buffer[j];
-                                buffer[j] = settings.placeholder;
-                            } else {
-                                break;
-                            }
-                            j = seekNext(j);
-                        }
-                    }
-                    writeBuffer();
-                    input.caret(Math.max(firstNonMaskPos, begin));
-                }
-
-                function shiftR(pos) {
-                    var i, c, j, t;
-                    for (i = pos, c = settings.placeholder; i < len; i++) {
-                        if (tests[i]) {
-                            j = seekNext(i);
-                            t = buffer[i];
-                            buffer[i] = c;
-                            if (j < len && tests[j].test(t)) {
-                                c = t;
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                function keydownEvent(e) {
-                    var k = e.which,
-                        pos, begin, end;
-                    if (k === 8 || k === 46 || iPhone && k === 127) {
-                        pos = input.caret();
-                        begin = pos.begin;
-                        end = pos.end;
-                        if (end - begin === 0) {
-                            begin = k !== 46 ? seekPrev(begin) : end = seekNext(begin - 1);
-                            end = k === 46 ? seekNext(end) : end;
-                        }
-                        clearBuffer(begin, end);
-                        shiftL(begin, end - 1);
-                        e.preventDefault();
-                    } else {
-                        if (k == 27) {
-                            input.val(focusText);
-                            input.caret(0, checkVal());
-                            e.preventDefault();
-                        }
-                    }
-                }
-
-                function keypressEvent(e) {
-                    var k = e.which,
-                        pos = input.caret(),
-                        p, c, next;
-                    if (e.ctrlKey || e.altKey || e.metaKey || k < 32) {
-                        return;
-                    } else {
-                        if (k) {
-                            if (pos.end - pos.begin !== 0) {
-                                clearBuffer(pos.begin, pos.end);
-                                shiftL(pos.begin, pos.end - 1);
-                            }
-                            p = seekNext(pos.begin - 1);
-                            if (p < len) {
-                                c = String.fromCharCode(k);
-                                if (tests[p].test(c)) {
-                                    shiftR(p);
-                                    buffer[p] = c;
-                                    writeBuffer();
-                                    next = seekNext(p);
-                                    if (android) {
-                                        setTimeout($.proxy($.fn.caret, input, next), 0);
-                                    } else {
-                                        input.caret(next);
-                                    }
-                                    if (settings.completed && next >= len) {
-                                        settings.completed.call(input);
-                                    }
-                                }
-                            }
-                            e.preventDefault();
-                        }
-                    }
-                }
-
-                function clearBuffer(start, end) {
-                    var i;
-                    for (i = start; i < end && i < len; i++) {
-                        if (tests[i]) {
-                            buffer[i] = settings.placeholder;
-                        }
-                    }
-                }
-
-                function writeBuffer() {
-                    input.val(buffer.join(""));
-                }
-
-                function checkVal(allow) {
-                    var test = input.val(),
-                        lastMatch = -1,
-                        i, c;
-                    for (i = 0, pos = 0; i < len; i++) {
-                        if (tests[i]) {
-                            buffer[i] = settings.placeholder;
-                            while (pos++ < test.length) {
-                                c = test.charAt(pos - 1);
-                                if (tests[i].test(c)) {
-                                    buffer[i] = c;
-                                    lastMatch = i;
-                                    break;
-                                }
-                            }
-                            if (pos > test.length) {
-                                break;
-                            }
-                        } else {
-                            if (buffer[i] === test.charAt(pos) && i !== partialPosition) {
-                                pos++;
-                                lastMatch = i;
-                            }
-                        }
-                    }
-                    if (allow) {
-                        writeBuffer();
-                    } else {
-                        if (lastMatch + 1 < partialPosition) {
-                            input.val("");
-                            clearBuffer(0, len);
-                        } else {
-                            writeBuffer();
-                            input.val(input.val().substring(0, lastMatch + 1));
-                        }
-                    }
-                    return partialPosition ? i : firstNonMaskPos;
-                }
-                input.data($.mask.dataName, function() {
-                    return $.map(buffer, function(c, i) {
-                        return tests[i] && c != settings.placeholder ? c : null;
-                    }).join("");
-                });
-                if (!input.attr("readonly")) {
-                    input.one("unmask", function() {
-                        input.unbind(".mask").removeData($.mask.dataName);
-                    }).bind("focus.mask", function() {
-                        clearTimeout(caretTimeoutId);
-                        var pos, moveCaret;
-                        focusText = input.val();
-                        pos = checkVal();
-                        caretTimeoutId = setTimeout(function() {
-                            writeBuffer();
-                            if (pos == mask.length) {
-                                input.caret(0, pos);
-                            } else {
-                                input.caret(pos);
-                            }
-                        }, 10);
-                    }).bind("blur.mask", function() {
-                        checkVal();
-                        if (input.val() != focusText) {
-                            input.change();
-                        }
-                    }).bind("keydown.mask", keydownEvent).bind("keypress.mask", keypressEvent).bind(pasteEventName, function() {
-                        setTimeout(function() {
-                            var pos = checkVal(true);
-                            input.caret(pos);
-                            if (settings.completed && pos == input.val().length) {
-                                settings.completed.call(input);
-                            }
-                        }, 0);
-                    });
-                }
-                checkVal();
-            });
-        }
-    });
-})(jQuery);
-
-// jquery poly fill for some advanced level action which are really difficult achieve using AngularJS
-$(function() {
-    $(document).on('click', '.guestStatus', function(event) {
-        var target = $(event.target),
-            selectedRow = $('tr[ng-repeat][data-index]:eq(' + +$(target).closest("div[ng-repeat]").attr('class')
-                .trim().split(' ').pop().split('-')[1] + ')');
-
-        if (/flight/gi.test((target.text() || ' ').trim())) {
-            $('td.profile-flying-column span[ng-click]:eq(0)', selectedRow).trigger('click');
-            $('div.guestMoreInformationClass.flightDetails', selectedRow).find('input,select').first().trigger('focus');
-        } else {
-            if (/hotel/gi.test((target.text() || ' ').trim())) {
-                $('td.profile-hotel-needs-column span[ng-click]:eq(0)', selectedRow).trigger('click');
-                $('div.guestMoreInformationClass.hotelDetails', selectedRow).find('input,select').first().trigger('focus');
-            } else {
-                if (/special/gi.test((target.text() || ' ').trim())) {
-                    $('td.profile-special-needs-column button[ng-click]:eq(0)', selectedRow).trigger('click');
-                }
-            }
-        }
-    });
-});
+]);
