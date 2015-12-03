@@ -7,9 +7,7 @@ angular.module("guestDetails").controller("cntrGuestDetails", ["$scope", "$rootS
 
     // (extend guestMoreInformation) extendGuestDetails function to expand and collapse
     GDscope.extendGuestDetails = function(ind) {
-        GDscope.ifExtendGuest(ind) 
-			&& (GDscope.ifExtendGuestSelected = '', activeTabs.splice(activeTabs.indexOf(ind), 1)) 
-			|| (activeTabs.push(ind), GDscope.ifExtendGuestSelected = ind);
+        GDscope.ifExtendGuest(ind) && (GDscope.ifExtendGuestSelected = '', activeTabs.splice(activeTabs.indexOf(ind), 1)) || (activeTabs.push(ind), GDscope.ifExtendGuestSelected = ind);
     };
 
     // guestMoreInformation function to expand and collapse
@@ -57,8 +55,12 @@ angular.module("guestDetails").controller("cntrGuestDetails", ["$scope", "$rootS
 // right part controller parent for both section flight and hotel
 .controller("cntrRightDetails", ["$scope", "GuestDetails", "GDUtility", "GlobalConst",
     function cntrRightDetails(RDscope, GDDetails, GDUtility, global) {
-        apex.custom.processAsync({ appprocess: 'getCityData' }, function(response) { });
-        apex.custom.processAsync({ appprocess: 'getCarrierData' }, function(response) { });
+        apex.custom.processAsync({
+            appprocess: 'getCityData'
+        }, function(response) {});
+        apex.custom.processAsync({
+            appprocess: 'getCarrierData'
+        }, function(response) {});
 
         // get selected drop-down index and parent index to get the selected data
         RDscope.getInitIndex = function(event, index) {
@@ -89,9 +91,8 @@ angular.module("guestDetails").controller("cntrGuestDetails", ["$scope", "$rootS
         // modifySelected ==> update selected data into root model
         RDscope.modifySelected = function(section, property, element, index) {
             var getProperty = GDUtility.getSelectIndex('object');
-            getProperty.status && property 
-				&& (RDscope.guestList[getProperty.value][GDUtility.getValue(section, global)][index][property] = element || '');
-				
+            getProperty.status && property && (RDscope.guestList[getProperty.value][GDUtility.getValue(section, global)][index][property] = element || '');
+
             getProperty.status && !property && (RDscope.guestList[getProperty.value][section] = element || '');
         };
 
@@ -99,10 +100,10 @@ angular.module("guestDetails").controller("cntrGuestDetails", ["$scope", "$rootS
         RDscope.addSection = function addGuest(section, event, object, column) {
             var selected = GDUtility.getSelectedIndex(event.target),
                 selValue = GDUtility.getValue(section, global);
-				
+
             GDUtility.getSelectedData.apply(null, [RDscope, "guestList", selected])[selValue]
                 .push(angular.copy(GDUtility.getValue(selValue, global)));
-				
+
             GDDetails.guestAdd(GDUtility.getValue(section, global), selected, column, {
                 scope: RDscope,
                 data: GDUtility.getSelectedData(RDscope, "guestList", selected),
